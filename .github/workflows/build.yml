@@ -4,10 +4,14 @@ on:
   push:
     branches:
       - main
+      - dev
+      - test
+      - prod
 
 jobs:
   build-and-push:
     runs-on: self-hosted
+    if: github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod'
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -27,7 +31,7 @@ jobs:
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: dennis-test-ga
-          IMAGE_TAG: latest
+          IMAGE_TAG: ${{ github.ref_name }}
         run: |
           docker build . -t $REGISTRY/dennis-test-ga:$IMAGE_TAG
           docker push $REGISTRY/dennis-test-ga:$IMAGE_TAG

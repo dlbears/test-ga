@@ -11,7 +11,7 @@ on:
 jobs:
   build-and-push:
     runs-on: self-hosted
-    if: github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod'
+    if: github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod' || github.ref_name == 'main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -31,7 +31,11 @@ jobs:
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: dennis-test-ga
-          IMAGE_TAG: ${{ github.ref_name }}
         run: |
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            IMAGE_TAG="latest"
+          else
+            IMAGE_TAG="${{ github.ref_name }}"
+          fi
           docker build . -t $REGISTRY/dennis-test-ga:$IMAGE_TAG
           docker push $REGISTRY/dennis-test-ga:$IMAGE_TAG
